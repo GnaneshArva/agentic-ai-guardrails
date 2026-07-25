@@ -1,0 +1,702 @@
+
+
+App Name
+
+agentic-ai-guardrails
+
+
+
+Objective
+
+Build an Enterprise-grade Guardrails Framework named agentic-ai-guardrails.
+
+The framework should provide reusable Input Guardrails and Output Guardrails that can be plugged into any Agentic AI application, MCP Server, AI Gateway, or AI Orchestrator.
+
+The framework should not depend on any specific LLM, MCP server, or business domain.
+
+It should be implemented as a standalone Python library that demonstrates how enterprise organizations enforce safety, validation, compliance, and output quality before and after every LLM invocation.
+
+
+---
+
+Architecture Principles
+
+Follow:
+
+Clean Architecture
+
+SOLID Principles
+
+Strategy Pattern
+
+Chain of Responsibility Pattern
+
+Factory Pattern
+
+Dependency Injection
+
+Configuration-driven execution
+
+Async Programming
+
+
+The framework should make it easy to add new guardrails without modifying existing code.
+
+
+---
+
+High-Level Architecture
+
+User Request
+      │
+      ▼
+Input Guardrail Pipeline
+      │
+      ▼
+Agent / LLM / MCP
+      │
+      ▼
+Output Guardrail Pipeline
+      │
+      ▼
+User Response
+
+Both pipelines must be independently configurable.
+
+
+---
+
+Project Structure
+
+agentic-ai-guardrails/
+
+│
+├── app/
+│
+│   ├── config/
+│   │
+│   ├── dto/
+│   │
+│   ├── interfaces/
+│   │
+│   ├── factories/
+│   │
+│   ├── pipeline/
+│   │
+│   ├── services/
+│   │
+│   ├── strategies/
+│   │      ├── input/
+│   │      └── output/
+│   │
+│   ├── implementations/
+│   │
+│   ├── exceptions/
+│   │
+│   └── utils/
+│
+├── pyproject.toml
+│
+├── README.md
+│
+└── .env.example
+
+
+---
+
+Core Design Pattern
+
+The framework must use the Chain of Responsibility Pattern for pipeline execution.
+
+Example:
+
+Prompt Injection
+
+↓
+
+Jailbreak Detection
+
+↓
+
+PII Detection
+
+↓
+
+Input Validation
+
+↓
+
+Business Validation
+
+↓
+
+LLM
+
+Each guardrail executes independently.
+
+If one fails:
+
+Stop pipeline
+
+Return structured failure DTO
+
+
+No remaining guardrails execute.
+
+
+---
+
+Strategy Pattern
+
+Every guardrail must implement a common interface.
+
+Example:
+
+InputGuardrail
+
+class InputGuardrail(ABC):
+
+    async def validate(
+        self,
+        request: InputGuardrailRequest
+    ) -> GuardrailResult:
+        ...
+
+Likewise:
+
+OutputGuardrail
+
+Every guardrail must be replaceable.
+
+
+---
+
+Input Guardrail Pipeline
+
+Create
+
+InputGuardrailPipeline
+
+Pipeline:
+
+Input
+
+↓
+
+Prompt Injection Guardrail
+
+↓
+
+Jailbreak Guardrail
+
+↓
+
+PII Guardrail
+
+↓
+
+Input Validation Guardrail
+
+↓
+
+Business Validation Guardrail
+
+↓
+
+Success
+
+
+---
+
+Implement Input Guardrails
+
+1.
+
+PromptInjectionGuardrail
+
+Detect:
+
+Ignore previous instructions
+
+Reveal system prompt
+
+Override developer instructions
+
+Prompt leakage attempts
+
+
+Return:
+
+ALLOW
+
+BLOCK
+
+WARNING
+
+
+---
+
+2.
+
+JailbreakGuardrail
+
+Detect:
+
+DAN
+
+Developer mode
+
+Ignore restrictions
+
+Role-play bypasses
+
+
+
+---
+
+3.
+
+PiiInputGuardrail
+
+Detect:
+
+Credit cards
+
+Passport
+
+Aadhaar
+
+PAN
+
+SSN
+
+API Keys
+
+Passwords
+
+
+Configurable:
+
+Mask
+
+Reject
+
+Warn
+
+
+
+---
+
+4.
+
+InputValidationGuardrail
+
+Validate:
+
+Empty request
+
+Required fields
+
+DTO validation
+
+Max prompt size
+
+Max attachment size
+
+
+
+---
+
+5.
+
+BusinessValidationGuardrail
+
+Pluggable business rules.
+
+Examples:
+
+Travel Agent
+
+Reject:
+
+Delete payroll
+
+Modify employee salary
+
+Access HR database
+
+
+---
+
+Output Guardrail Pipeline
+
+Create
+
+OutputGuardrailPipeline
+
+Pipeline
+
+LLM Response
+
+↓
+
+PII Guardrail
+
+↓
+
+Toxicity Guardrail
+
+↓
+
+Hallucination Guardrail
+
+↓
+
+Citation Guardrail
+
+↓
+
+Structured Output Guardrail
+
+↓
+
+Business Validation Guardrail
+
+↓
+
+Success
+
+
+---
+
+Implement Output Guardrails
+
+1.
+
+PiiOutputGuardrail
+
+Mask:
+
+Credit cards
+
+Passport
+
+Email
+
+Phone
+
+Secrets
+
+
+
+---
+
+2.
+
+ToxicityGuardrail
+
+Detect:
+
+Hate speech
+
+Abuse
+
+Harassment
+
+Offensive language
+
+
+
+---
+
+3.
+
+HallucinationGuardrail
+
+Design as an interface.
+
+Default implementation:
+
+Simple grounding check against provided retrieval context.
+
+Future implementations:
+
+LLM-as-a-Judge
+
+Confidence Scoring
+
+External Fact Verification
+
+
+
+---
+
+4.
+
+CitationGuardrail
+
+Verify:
+
+Every citation exists
+
+Retrieved document IDs are valid
+
+No fabricated sources
+
+
+
+---
+
+5.
+
+StructuredOutputGuardrail
+
+Validate
+
+Pydantic DTO
+
+JSON Schema
+
+Enums
+
+Required fields
+
+Reject invalid output.
+
+
+---
+
+6.
+
+BusinessOutputGuardrail
+
+Verify business rules.
+
+Example:
+
+LLM says
+
+Refund Approved
+
+Guardrail checks:
+
+Payment Tool
+
+↓
+
+Status
+
+↓
+
+Approved?
+
+↓
+
+Yes
+
+↓
+
+Return
+
+Otherwise reject.
+
+
+---
+
+Factory Pattern
+
+Create
+
+InputGuardrailFactory
+
+OutputGuardrailFactory
+
+Instantiate pipelines from configuration.
+
+
+---
+
+DTOs
+
+Use Pydantic v2.
+
+Examples:
+
+InputGuardrailRequest
+
+OutputGuardrailRequest
+
+GuardrailResult
+
+GuardrailViolation
+
+PipelineResult
+
+Never use dictionaries.
+
+
+---
+
+Configuration
+
+Support
+
+ENABLE_PROMPT_INJECTION
+
+ENABLE_JAILBREAK
+
+ENABLE_PII
+
+ENABLE_TOXICITY
+
+ENABLE_HALLUCINATION
+
+ENABLE_CITATION
+
+ENABLE_OUTPUT_VALIDATION
+
+Also:
+
+STOP_ON_FIRST_FAILURE=true
+
+or
+
+false
+
+
+---
+
+Pipeline Execution
+
+Support two modes.
+
+Sequential
+
+Prompt Injection
+
+↓
+
+Jailbreak
+
+↓
+
+PII
+
+↓
+
+Validation
+
+
+---
+
+Parallel
+
+Independent guardrails should execute concurrently using asyncio.
+
+Example
+
+PII
+
+Toxicity
+
+Prompt Injection
+
+↓
+
+Run Together
+
+↓
+
+Collect Results
+
+The execution mode should be configurable.
+
+
+---
+
+Extensibility
+
+Adding a new guardrail should require only:
+
+1. Implement interface.
+
+
+2. Register in factory.
+
+
+3. Enable in configuration.
+
+
+
+No existing guardrail code should be modified.
+
+
+---
+
+Public API
+
+The library should expose a simple API:
+
+input_pipeline.validate(request)
+
+output_pipeline.validate(response)
+
+So any Agent, MCP Server, AI Gateway, or Orchestrator can integrate it without knowing the internal implementation.
+
+
+---
+
+Documentation
+
+Generate a comprehensive README covering:
+
+Project overview
+
+Enterprise Guardrail Architecture
+
+Why Input vs Output Guardrails
+
+Chain of Responsibility Pattern
+
+Strategy Pattern
+
+Factory Pattern
+
+Dependency Injection
+
+Pipeline execution modes
+
+Folder structure
+
+Configuration
+
+Adding a new guardrail
+
+Integrating with an MCP Server
+
+Integrating with OpenAI Agents SDK
+
+Example request lifecycle
+
+Example failures
+
+Best practices
+
+
+
+---
+
+Deliverables
+
+Generate a complete runnable Python project using:
+
+Python 3.12+
+
+Pydantic v2
+
+asyncio
+
+uv package manager
+
+
+The framework should provide reusable, enterprise-grade Input Guardrail and Output Guardrail pipelines that any Agentic AI application or MCP server can plug into. The design should emphasize extensibility, replaceability, and clear separation of concerns using Chain of Responsibility, Strategy, Factory, and Dependency Injection patterns, making it suitable as a shared AI platform component rather than an application-specific implementation.
