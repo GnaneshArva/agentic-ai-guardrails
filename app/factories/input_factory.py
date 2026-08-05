@@ -7,6 +7,8 @@ from app.strategies.input.input_validation import InputValidationGuardrail
 from app.strategies.input.jailbreak import JailbreakGuardrail
 from app.strategies.input.pii_input import PiiInputGuardrail
 from app.strategies.input.prompt_injection import PromptInjectionGuardrail
+from app.strategies.input.secret_detection import SecretDetectionGuardrail
+from app.strategies.input.unicode_normalization import UnicodeNormalizationGuardrail
 
 
 class InputGuardrailFactory:
@@ -28,6 +30,9 @@ class InputGuardrailFactory:
         """
         active_settings = cfg or global_settings
         guardrails: list[InputGuardrail] = []
+
+        guardrails.append(UnicodeNormalizationGuardrail())
+        guardrails.append(SecretDetectionGuardrail())
 
         if active_settings.ENABLE_PROMPT_INJECTION:
             guardrails.append(PromptInjectionGuardrail())
