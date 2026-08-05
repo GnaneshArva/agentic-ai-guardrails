@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     ENABLE_STRUCTURED_OUTPUT: bool = Field(default=True, description="Enable structured output schema validation")
     ENABLE_BUSINESS_OUTPUT: bool = Field(default=True, description="Enable business domain validation on output")
     ENABLE_COHERENCE: bool = Field(default=True, description="Enable coherence and logical flow validation on output")
+    ENABLE_RISK_ASSESSMENT: bool = Field(default=True, description="Enable Human-in-the-Loop HITL risk assessment")
 
     # PII Handling Actions
     PII_INPUT_ACTION: PiiAction = Field(default=PiiAction.MASK, description="Action for input PII: MASK, REJECT, or WARN")
@@ -37,6 +38,7 @@ class Settings(BaseSettings):
     HALLUCINATION_MIN_GROUNDING_SCORE: float = Field(default=0.60, ge=0.0, le=1.0, description="Minimum grounding overlap score required")
     TOXICITY_THRESHOLD: float = Field(default=0.50, ge=0.0, le=1.0, description="Toxicity detection score threshold")
     COHERENCE_MIN_SCORE: float = Field(default=0.70, ge=0.0, le=1.0, description="Minimum coherence score required")
+    AUTO_APPROVAL_MAX_AMOUNT_USD: float = Field(default=250.0, ge=0.0, description="Maximum amount in USD for auto-approval without human approval")
 
     model_config = SettingsConfigDict(
         env_file=".env",

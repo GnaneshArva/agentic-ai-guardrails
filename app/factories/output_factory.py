@@ -7,6 +7,7 @@ from app.strategies.output.citation import CitationGuardrail
 from app.strategies.output.coherence import CoherenceGuardrail
 from app.strategies.output.hallucination import HallucinationGuardrail
 from app.strategies.output.pii_output import PiiOutputGuardrail
+from app.strategies.output.risk_assessment import RiskAssessmentGuardrail
 from app.strategies.output.structured_output import StructuredOutputGuardrail
 from app.strategies.output.toxicity import ToxicityGuardrail
 
@@ -53,6 +54,9 @@ class OutputGuardrailFactory:
 
         if active_settings.ENABLE_COHERENCE:
             guardrails.append(CoherenceGuardrail(min_coherence_score=active_settings.COHERENCE_MIN_SCORE))
+
+        if getattr(active_settings, "ENABLE_RISK_ASSESSMENT", True):
+            guardrails.append(RiskAssessmentGuardrail(auto_approval_max_amount_usd=getattr(active_settings, "AUTO_APPROVAL_MAX_AMOUNT_USD", 250.0)))
 
         if custom_guardrails:
             guardrails.extend(custom_guardrails)
