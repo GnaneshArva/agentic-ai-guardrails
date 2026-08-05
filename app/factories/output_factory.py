@@ -4,6 +4,7 @@ from app.interfaces.output_guardrail import OutputGuardrail
 from app.pipeline.output_pipeline import OutputGuardrailPipeline
 from app.strategies.output.business_output_validation import BusinessOutputGuardrail
 from app.strategies.output.citation import CitationGuardrail
+from app.strategies.output.coherence import CoherenceGuardrail
 from app.strategies.output.hallucination import HallucinationGuardrail
 from app.strategies.output.pii_output import PiiOutputGuardrail
 from app.strategies.output.structured_output import StructuredOutputGuardrail
@@ -49,6 +50,9 @@ class OutputGuardrailFactory:
 
         if active_settings.ENABLE_BUSINESS_OUTPUT:
             guardrails.append(BusinessOutputGuardrail())
+
+        if active_settings.ENABLE_COHERENCE:
+            guardrails.append(CoherenceGuardrail(min_coherence_score=active_settings.COHERENCE_MIN_SCORE))
 
         if custom_guardrails:
             guardrails.extend(custom_guardrails)

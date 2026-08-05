@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     ENABLE_CITATION: bool = Field(default=True, description="Enable citation verification against context")
     ENABLE_STRUCTURED_OUTPUT: bool = Field(default=True, description="Enable structured output schema validation")
     ENABLE_BUSINESS_OUTPUT: bool = Field(default=True, description="Enable business domain validation on output")
+    ENABLE_COHERENCE: bool = Field(default=True, description="Enable coherence and logical flow validation on output")
 
     # PII Handling Actions
     PII_INPUT_ACTION: PiiAction = Field(default=PiiAction.MASK, description="Action for input PII: MASK, REJECT, or WARN")
@@ -35,6 +36,7 @@ class Settings(BaseSettings):
     MAX_ATTACHMENT_SIZE_BYTES: int = Field(default=10485760, description="Max individual attachment size in bytes (default 10MB)")
     HALLUCINATION_MIN_GROUNDING_SCORE: float = Field(default=0.60, ge=0.0, le=1.0, description="Minimum grounding overlap score required")
     TOXICITY_THRESHOLD: float = Field(default=0.50, ge=0.0, le=1.0, description="Toxicity detection score threshold")
+    COHERENCE_MIN_SCORE: float = Field(default=0.70, ge=0.0, le=1.0, description="Minimum coherence score required")
 
     model_config = SettingsConfigDict(
         env_file=".env",
